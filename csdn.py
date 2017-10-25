@@ -2,6 +2,7 @@
 import urllib.request 
 import re
 import sys
+from html.parser import HTMLParser
 
 def getHtmlInfo(url):
 	print('url:'+url)
@@ -34,6 +35,14 @@ def getArticleInfo(html):
 		articleRe=re.compile(reg,re.S)
 		articleList=re.findall(articleRe,html)
 		return articleList
+#--------------
+class MyHTMLParser(HTMLParser):
+	def __init__(self):
+		HTMLParser.__init__(self)
+		self.htmlStr = ''
+	def handle_data(self, data):
+		self.htmlStr+=(data)
+#--------------
 htmlStr='http://blog.csdn.net'
 html=getHtmlInfo("http://blog.csdn.net/yeyinglingfeng?viewmode=contents")
 
@@ -45,4 +54,8 @@ for articleUrl in articleUrlList:
 	fileName=time+' '+title
 	print(fileName)
 	articleInfo=getArticleInfo(articleHtml)[0]
-	saveInfo(articleInfo,fileName)
+	parser = MyHTMLParser()
+	parser.feed(articleInfo)
+	parser.close()
+	saveInfo(parser.htmlStr,fileName)
+	saveInfo(articleInfo,fileName+'2')
